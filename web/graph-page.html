@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FinGraph AI - Cascade Impact Graph</title>
+  <!-- Pinned Cytoscape.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-body: #101114;
+      --bg-sidebar: #131417;
+      --bg-card: #18191e;
+      --bg-card-inner: #202228;
+      --bg-hover: #21232b;
+      --border-color: rgba(255, 255, 255, 0.05);
+      --border-light: rgba(255, 255, 255, 0.09);
+
+      --text-white: #ffffff;
+      --text-secondary: #9aa0ad;
+      --text-muted: #5e6472;
+
+      --accent-blue: #38bdf8;
+      --accent-blue-deep: #2563eb;
+      --accent-pink: #f43f5e;
+      --accent-pink-neon: #ff2e7e;
+      --accent-orange: #ff7a45;
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+
+      --badge-pink: #ff2e7e;
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+      --radius-card: 18px;
+      --radius-sm: 10px;
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-body: #f4f5f8;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-inner: #f8f9fc;
+      --bg-hover: #f1f3f9;
+      --border-color: rgba(0, 0, 0, 0.07);
+      --border-light: rgba(0, 0, 0, 0.12);
+      --text-white: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-white);
+      font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-body);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #282a33;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3c3f4c;
+    }
+
+    /* Main Shell */
+    .app-container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 210px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 8px 24px;
+    }
+
+    .avatar-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+      background: #252833;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f43f5e, #8b5cf6);
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .user-info .user-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-white);
+      line-height: 1.2;
+    }
+
+    .user-info .user-subtitle {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 9px 12px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .nav-link:hover {
+      color: var(--text-white);
+      background-color: var(--bg-card);
+    }
+
+    .nav-link.active {
+      color: var(--text-white);
+      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-link.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--accent-pink-neon);
+      box-shadow: 0 0 8px var(--accent-pink-neon);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background-color: var(--badge-pink);
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      line-height: 1.4;
+      box-shadow: 0 2px 6px rgba(255, 46, 126, 0.4);
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 18px 8px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 14px;
+    }
+
+    .sidebar-bottom .nav-link {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .sidebar-bottom .nav-link svg {
+      margin-left: auto;
+      opacity: 0.6;
+    }
+
+    /* Theme Toggle */
+    .theme-switch-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 10px 4px;
+      margin-top: 8px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .theme-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .theme-toggle {
+      position: relative;
+      width: 38px;
+      height: 20px;
+      background: #252833;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .theme-toggle::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="light"] .theme-toggle {
+      background: #3b82f6;
+    }
+
+    [data-theme="light"] .theme-toggle::after {
+      transform: translateX(18px);
+    }
+
+    /* MAIN CONTENT */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow-y: auto;
+      background-color: var(--bg-body);
+    }
+
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px 4px;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .brand-tag .indicator-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .search-pill input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-white);
+      font-size: 12px;
+      width: 140px;
+    }
+
+    /* Page Body */
+    .page-body {
+      padding: 16px 28px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .title-bar h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .title-bar p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Controls Bar */
+    .controls-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .control-item input[type="checkbox"] {
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slider-wrap input[type="range"] {
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+
+    .btn-pill {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-pill:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-light);
+    }
+
+    .btn-pill.primary {
+      background: var(--accent-blue);
+      color: #0b1710;
+      border-color: transparent;
+    }
+
+    .btn-pill.primary:hover {
+      filter: brightness(1.15);
+    }
+
+    /* Graph Canvas Card */
+    .graph-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      height: calc(100vh - 230px);
+      min-height: 580px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    #cy {
+      width: 100%;
+      height: 100%;
+      background: #0c0e12;
+    }
+
+    /* Floating Legend */
+    .graph-legend {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(24, 25, 30, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      z-index: 10;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    /* Slide-out Drawer */
+    .evidence-drawer {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 360px;
+      background: #15171d;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 18px;
+      z-index: 20;
+      display: none;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .drawer-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .drawer-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .drawer-close:hover {
+      color: #fff;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .meta-row b {
+      color: var(--text-white);
+    }
+
+    .quote-box {
+      background: var(--bg-card-inner);
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin: 12px 0;
+    }
+
+    .edgar-link {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .edgar-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body data-theme="dark">
+
+  <div class="app-container">
+
+    <!-- SIDEBAR (Unified with Alena Kovaleva & Overview) -->
+    <aside class="sidebar">
+      <div class="user-profile">
+        <div class="avatar-wrapper">
+          <img class="avatar-img" src="/avatar.jpg" alt="Alena Kovaleva"
+            onerror="this.style.display='none'; document.getElementById('avatar-fallback').style.display='flex';">
+          <div id="avatar-fallback" class="avatar-fallback">AK</div>
+        </div>
+        <div class="user-info">
+          <h3 class="user-name">Alena Kovaleva</h3>
+          <p class="user-subtitle">Personal Account</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="nav-link" id="nav-overview">
+          Overview
+          <span class="nav-badge" style="background:#4b5563;">10</span>
+        </a>
+        <a href="/graph-view" class="nav-link active" id="nav-graph">
+          Graph Cascade
+          <span class="nav-badge" style="background:var(--accent-blue);">Live</span>
+        </a>
+        <a href="/flow-view" class="nav-link" id="nav-flow">
+          Evidence Flow
+          <span class="nav-badge" style="background:var(--accent-purple);">6 Col</span>
+        </a>
+        <a href="/" class="nav-link" id="nav-savings">Savings</a>
+        <a href="/" class="nav-link" id="nav-cards">
+          Cards
+          <span class="nav-badge">2</span>
+        </a>
+        <a href="/" class="nav-link" id="nav-payments">Payments</a>
+        <a href="/" class="nav-link" id="nav-profile">Profile</a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="#" class="nav-link">Support</a>
+        <a href="#" class="nav-link">Setting</a>
+        <a href="#" class="nav-link">
+          Sign out
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+
+        <!-- Theme Switch -->
+        <div class="theme-switch-box">
+          <span class="theme-label">Theme</span>
+          <div class="theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <main class="main-wrapper">
+      <header class="top-header">
+        <div class="brand-tag">
+          <span class="indicator-dot"></span>
+          <span>FinGraph AI Platform • Live Engine</span>
+        </div>
+        <div class="header-tools">
+          <div class="search-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" placeholder="Search analytics..." id="global-search-input">
+          </div>
+          <a href="/" class="btn-pill" style="text-decoration:none;">&larr; Back to Dashboard</a>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="title-bar">
+          <div>
+            <h2>Cascade Impact Graph</h2>
+            <p>Point-in-time shock propagation: Event &rarr; Commodities &rarr; Sectors &rarr; Companies</p>
+          </div>
+          <span class="btn-pill"
+            style="color:var(--accent-orange); border-color:rgba(255,122,69,0.3); background:rgba(255,122,69,0.08);">
+            ● Epistemic Validation Active
+          </span>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-card">
+          <label class="control-item">
+            <input type="checkbox" id="tier-toggle" checked>
+            <span>Fact + Inference only</span>
+          </label>
+
+          <div class="control-item slider-wrap">
+            <span>Hop depth:</span>
+            <input type="range" id="hop-slider" min="1" max="3" value="3">
+            <b id="hop-val" style="color:var(--accent-blue);">3</b>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-left:auto;">
+            <button class="btn-pill primary" id="btn-recenter">Recenter View</button>
+            <button class="btn-pill" id="btn-scenario">Crude Oil Scenario</button>
+          </div>
+        </div>
+
+        <!-- Graph Container -->
+        <div class="graph-card">
+          <div id="cy"></div>
+
+          <div class="graph-legend">
+            <span><i class="legend-dot" style="background:var(--accent-green);"></i> Fact</span>
+            <span><i class="legend-dot" style="background:var(--accent-orange);"></i> Inference</span>
+            <span><i class="legend-dot" style="background:var(--accent-pink-neon);"></i> Hypothesis</span>
+            <span style="color:var(--text-muted); margin-left:6px;">Line thickness = Confidence</span>
+          </div>
+
+          <!-- Evidence Slide-Out Drawer -->
+          <div class="evidence-drawer" id="edge-drawer">
+            <div class="drawer-header">
+              <h3 id="dr-title">Edge Evidence</h3>
+              <button class="drawer-close" id="dr-close">&times;</button>
+            </div>
+            <div class="meta-row"><span>Relationship</span><b id="dr-relation">-</b></div>
+            <div class="meta-row"><span>Epistemic Tier</span><b id="dr-tier">-</b></div>
+            <div class="meta-row"><span>Confidence</span><b id="dr-conf">-</b></div>
+            <div class="meta-row"><span>Cascade Hop</span><b id="dr-hop">-</b></div>
+            <div class="meta-row"><span>Source Date</span><b id="dr-date">-</b></div>
+            <div class="quote-box" id="dr-quote">&ldquo;Verbatim evidence quote&rdquo;</div>
+            <div>
+              <a id="dr-url" href="#" target="_blank" rel="noopener noreferrer" class="edgar-link">
+                <span>View primary filing on SEC EDGAR &rarr;</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Theme Switch
+    const themeBtn = document.getElementById("theme-toggle-btn");
+    themeBtn.addEventListener("click", () => {
+      const currentTheme = document.body.getAttribute("data-theme");
+      const newTheme = currentTheme === "light" ? "dark" : "light";
+      document.body.setAttribute("data-theme", newTheme);
+    });
+
+    const $ = id => document.getElementById(id);
+    const API = window.location.origin;
+
+    let cy = null;
+    let rawEdges = [];
+    let impactNodes = [];
+
+    const SECTOR_MAP = {
+      "DAL": "Airlines",
+      "FDX": "Freight & Logistics",
+      "UNP": "Railroads & Transportation",
+      "VLO": "Petroleum Refining",
+      "XOM": "Integrated Oil & Gas",
+      "F": "Automotive Manufacturing"
+    };
+
+    async function initGraph() {
+      try {
+        const [edgesRes, impactRes] = await Promise.all([
+          fetch(`${API}/edges`).then(r => r.json()),
+          fetch(`${API}/impact/crude_oil?shock_type=supply`).then(r => r.json())
+        ]);
+
+        rawEdges = edgesRes;
+        impactNodes = impactRes.nodes || [];
+        renderCytoscape();
+      } catch (err) {
+        console.error("Failed to load graph data:", err);
+      }
+    }
+
+    function renderCytoscape() {
+      const factInfOnly = $("tier-toggle").checked;
+      const maxHop = parseInt($("hop-slider").value, 10);
+
+      const elements = [];
+      const addedNodes = new Set();
+
+      elements.push({
+        data: {
+          id: "event_crude_oil",
+          label: "Crude Oil Price Spike",
+          type: "event",
+          color: "#ff2e7e",
+          size: 58
+        }
+      });
+      addedNodes.add("event_crude_oil");
+
+      const nodeHopMap = {};
+      impactNodes.forEach(n => {
+        nodeHopMap[n.node] = n.hop;
+      });
+
+      const filteredEdges = rawEdges.filter(e => {
+        if (factInfOnly && e.tier === "hypothesis") return false;
+        const hop = nodeHopMap[e.dst] || nodeHopMap[e.company] || 1;
+        if (hop > maxHop) return false;
+        return true;
+      });
+
+      const companyEdges = {};
+      filteredEdges.forEach(e => {
+        const key = `${e.src}->${e.dst}`;
+        if (!companyEdges[key] || (e.tier === "fact" && companyEdges[key].tier !== "fact")) {
+          companyEdges[key] = e;
+        }
+      });
+
+      Object.values(companyEdges).forEach((edge) => {
+        const srcId = edge.src;
+        const dstId = edge.dst;
+        const company = edge.company || dstId;
+        const sector = SECTOR_MAP[company] || "Energy Sector";
+        const sectorId = `sec_${sector.toLowerCase().replace(/\\W+/g, '_')}`;
+
+        if (!addedNodes.has(srcId)) {
+          elements.push({
+            data: { id: srcId, label: srcId, type: "commodity", color: "#a855f7", size: 46 }
+          });
+          addedNodes.add(srcId);
+          elements.push({
+            data: {
+              id: `ev_${srcId}`,
+              source: "event_crude_oil",
+              target: srcId,
+              tier: "fact",
+              confidence: 0.95,
+              color: "#10b981",
+              width: 5,
+              evidence_quote: "Primary crude oil price shock propagates to refined products.",
+              source_url: "https://www.eia.gov",
+              source_date: "2026-03-15",
+              hop: 1,
+              relation: "initiates commodity shock in"
+            }
+          });
+        }
+
+        if (!addedNodes.has(sectorId)) {
+          elements.push({
+            data: { id: sectorId, label: sector, type: "sector", color: "#ff7a45", size: 48 }
+          });
+          addedNodes.add(sectorId);
+        }
+
+        if (!addedNodes.has(dstId)) {
+          elements.push({
+            data: { id: dstId, label: `${company}\\n${sector}`, type: "company", color: "#38bdf8", size: 46 }
+          });
+          addedNodes.add(dstId);
+          elements.push({
+            data: {
+              id: `sec_link_${dstId}`,
+              source: sectorId,
+              target: dstId,
+              tier: "fact",
+              confidence: 0.90,
+              color: "#10b981",
+              width: 4,
+              evidence_quote: `${company} operates within the ${sector} industry sector.`,
+              source_url: edge.source_url,
+              source_date: edge.source_date,
+              hop: nodeHopMap[company] || 1,
+              relation: "sector classification encompasses"
+            }
+          });
+        }
+
+        const tierColor = edge.tier === "fact" ? "#10b981" : (edge.tier === "inference" ? "#ff7a45" : "#ff2e7e");
+        const edgeWidth = Math.max(2, Math.round((edge.confidence || 0.8) * 5.5));
+        elements.push({
+          data: {
+            id: `rel_${edge.edge_id || `${srcId}_${dstId}`}`,
+            source: srcId,
+            target: sectorId,
+            tier: edge.tier,
+            confidence: edge.confidence,
+            color: tierColor,
+            width: edgeWidth,
+            evidence_quote: edge.evidence_quote,
+            source_url: edge.source_url,
+            source_date: edge.source_date,
+            hop: nodeHopMap[company] || 1,
+            relation: edge.relationship_type
+          }
+        });
+      });
+
+      if (cy) {
+        cy.destroy();
+      }
+
+      cy = cytoscape({
+        container: $("cy"),
+        elements: elements,
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(label)',
+              'background-color': 'data(color)',
+              'width': 'data(size)',
+              'height': 'data(size)',
+              'color': '#ffffff',
+              'font-size': '11px',
+              'font-family': 'Inter, sans-serif',
+              'font-weight': 600,
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'text-wrap': 'wrap',
+              'border-width': 2,
+              'border-color': 'rgba(255, 255, 255, 0.2)',
+              'shadow-blur': 12,
+              'shadow-color': 'data(color)',
+              'shadow-opacity': 0.4
+            }
+          },
+          {
+            selector: 'node[type="event"]',
+            style: {
+              'shape': 'diamond',
+              'font-size': '12px',
+              'font-weight': 700
+            }
+          },
+          {
+            selector: 'edge',
+            style: {
+              'width': 'data(width)',
+              'line-color': 'data(color)',
+              'target-arrow-color': 'data(color)',
+              'target-arrow-shape': 'triangle',
+              'curve-style': 'bezier',
+              'opacity': 0.8
+            }
+          },
+          {
+            selector: 'edge:selected',
+            style: {
+              'width': 6,
+              'line-color': '#ffffff',
+              'target-arrow-color': '#ffffff',
+              'opacity': 1
+            }
+          }
+        ],
+        layout: {
+          name: 'breadthfirst',
+          directed: true,
+          roots: '#event_crude_oil',
+          padding: 40,
+          spacingFactor: 1.3
+        }
+      });
+
+      cy.on('tap', 'edge', function (evt) {
+        const edge = evt.target;
+        showDrawer(edge.data());
+      });
+
+      cy.on('tap', function (evt) {
+        if (evt.target === cy) {
+          $("edge-drawer").style.display = "none";
+        }
+      });
+    }
+
+    function showDrawer(data) {
+      $("dr-title").textContent = `Edge: ${data.source} → ${data.target}`;
+      $("dr-relation").textContent = data.relation || "cost_inflation";
+      $("dr-tier").textContent = (data.tier || "fact").toUpperCase();
+      $("dr-conf").textContent = `${Math.round((data.confidence || 0.8) * 100)}%`;
+      $("dr-hop").textContent = `Hop ${data.hop || 1}`;
+      $("dr-date").textContent = data.source_date || "2026-03-15";
+      $("dr-quote").innerHTML = `&ldquo;${data.evidence_quote || "SEC 10-K primary risk filing quote."}&rdquo;`;
+
+      const urlEl = $("dr-url");
+      if (data.source_url) {
+        urlEl.href = data.source_url;
+        urlEl.style.display = "inline-flex";
+      } else {
+        urlEl.style.display = "none";
+      }
+
+      $("edge-drawer").style.display = "block";
+    }
+
+    $("dr-close").addEventListener("click", () => {
+      $("edge-drawer").style.display = "none";
+    });
+
+    $("tier-toggle").addEventListener("change", renderCytoscape);
+
+    $("hop-slider").addEventListener("input", (e) => {
+      $("hop-val").textContent = e.target.value;
+      renderCytoscape();
+    });
+
+    $("btn-recenter").addEventListener("click", () => {
+      if (cy) {
+        cy.fit();
+        cy.center();
+      }
+    });
+
+    $("btn-scenario").addEventListener("click", () => {
+      $("hop-slider").value = 3;
+      $("hop-val").textContent = "3";
+      $("tier-toggle").checked = true;
+      renderCytoscape();
+    });
+
+    document.addEventListener("DOMContentLoaded", initGraph);
+  </script>
+</body>
+
+</html>

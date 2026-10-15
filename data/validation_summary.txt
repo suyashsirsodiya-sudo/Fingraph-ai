@@ -1,0 +1,1 @@
+Observed cumulative abnormal returns for DAL, XOM, VLO, UNP, F are consistent with the Event Impact Graph's directional shock predictions. Results for FDX are not consistent with the predicted direction. Primary event date evaluated: 2022-03-08.

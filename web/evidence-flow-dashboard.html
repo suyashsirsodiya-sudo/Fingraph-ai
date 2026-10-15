@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Evidence Flow - Source to Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-body: #101114;
+  --bg-sidebar: #131417;
+  --bg-card: #18191e;
+  --bg-card-inner: #202228;
+  --bg-hover: #21232b;
+  --border-color: rgba(255, 255, 255, 0.05);
+  --border-light: rgba(255, 255, 255, 0.09);
+  
+  --text-white: #ffffff;
+  --text-secondary: #9aa0ad;
+  --text-muted: #5e6472;
+  
+  --accent-blue: #38bdf8;
+  --accent-blue-deep: #2563eb;
+  --accent-pink: #f43f5e;
+  --accent-pink-neon: #ff2e7e;
+  --accent-orange: #ff7a45;
+  --accent-purple: #8b5cf6;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+
+  --badge-pink: #ff2e7e;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --radius-card: 18px;
+  --radius-sm: 10px;
+  --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] {
+  --bg-body: #f4f5f8;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-inner: #f8f9fc;
+  --bg-hover: #f1f3f9;
+  --border-color: rgba(0, 0, 0, 0.07);
+  --border-light: rgba(0, 0, 0, 0.12);
+  --text-white: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-white);
+  font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-body); }
+::-webkit-scrollbar-thumb { background: #282a33; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3c3f4c; }
+
+/* Main Shell */
+.app-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 210px;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 24px;
+}
+
+.avatar-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  background: #252833;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f43f5e, #8b5cf6);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.user-info .user-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-white);
+  line-height: 1.2;
+}
+
+.user-info .user-subtitle {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: var(--transition);
+  position: relative;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--text-white);
+  background-color: var(--bg-card);
+}
+
+.nav-link.active {
+  color: var(--text-white);
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nav-link.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-pink-neon);
+  box-shadow: 0 0 8px var(--accent-pink-neon);
+}
+
+.nav-badge {
+  margin-left: auto;
+  background-color: var(--badge-pink);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  line-height: 1.4;
+  box-shadow: 0 2px 6px rgba(255, 46, 126, 0.4);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 18px 8px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 14px;
+}
+
+.sidebar-bottom .nav-link {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.sidebar-bottom .nav-link svg {
+  margin-left: auto;
+  opacity: 0.6;
+}
+
+/* Theme Toggle */
+.theme-switch-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 10px 4px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.theme-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.theme-toggle {
+  position: relative;
+  width: 38px;
+  height: 20px;
+  background: #252833;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.theme-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .theme-toggle { background: #3b82f6; }
+[data-theme="light"] .theme-toggle::after { transform: translateX(18px); }
+
+/* MAIN CONTENT */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+  background-color: var(--bg-body);
+}
+
+.top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px 4px;
+}
+
+.brand-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.brand-tag .indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.search-pill input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-white);
+  font-size: 12px;
+  width: 140px;
+}
+
+.btn-pill {
+  background: var(--bg-card-inner);
+  border: 1px solid var(--border-color);
+  color: var(--text-white);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.btn-pill:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-light);
+}
+
+/* Page Body */
+.page-body {
+  padding: 16px 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.title-bar h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.title-bar p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Metrics Row */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1200px) {
+  .metrics-row { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .metrics-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-card);
+}
+
+.metric-card b {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-white);
+  line-height: 1.1;
+}
+
+.metric-card span {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* Flow Container */
+.flow-container {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  overflow-x: auto;
+  box-shadow: var(--shadow-card);
+  min-height: 520px;
+}
+
+.columns-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 24px;
+  position: relative;
+  z-index: 2;
+  min-width: 980px;
+}
+
+.col-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.col-header h3 {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-white);
+  display: flex;
+  justify-content: space-between;
+}
+
+.col-header .sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.node-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flow-node {
+  background: var(--bg-card-inner);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.flow-node:hover, .flow-node.active {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.2);
+}
+
+.flow-node.dimmed {
+  opacity: 0.25;
+}
+
+.node-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 11.5px;
+  color: var(--text-white);
+}
+
+.node-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.node-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.node-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+svg.flow-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+path.ribbon {
+  fill: none;
+  transition: stroke-opacity 0.15s ease, stroke-width 0.15s ease;
+}
+
+path.ribbon.active { stroke-opacity: 0.75 !important; }
+path.ribbon.dimmed { stroke-opacity: 0.04 !important; }
+
+#tooltip {
+  position: fixed;
+  background: #18191f;
+  border: 1px solid var(--border-light);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #fff;
+  pointer-events: none;
+  z-index: 99;
+  display: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="app-container">
+  
+  <!-- SIDEBAR (Unified with Alena Kovaleva & Overview) -->
+  <aside class="sidebar">
+    <div class="user-profile">
+      <div class="avatar-wrapper">
+        <img class="avatar-img" src="/avatar.jpg" alt="Alena Kovaleva" onerror="this.style.display='none'; document.getElementById('avatar-fallback').style.display='flex';">
+        <div id="avatar-fallback" class="avatar-fallback">AK</div>
+      </div>
+      <div class="user-info">
+        <h3 class="user-name">Alena Kovaleva</h3>
+        <p class="user-subtitle">Personal Account</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/" class="nav-link" id="nav-overview">
+        Overview
+        <span class="nav-badge" style="background:#4b5563;">10</span>
+      </a>
+      <a href="/graph-view" class="nav-link" id="nav-graph">
+        Graph Cascade
+        <span class="nav-badge" style="background:var(--accent-blue);">Live</span>
+      </a>
+      <a href="/flow-view" class="nav-link active" id="nav-flow">
+        Evidence Flow
+        <span class="nav-badge" style="background:var(--accent-purple);">6 Col</span>
+      </a>
+      <a href="/" class="nav-link" id="nav-savings">Savings</a>
+      <a href="/" class="nav-link" id="nav-cards">
+        Cards
+        <span class="nav-badge">2</span>
+      </a>
+      <a href="/" class="nav-link" id="nav-payments">Payments</a>
+      <a href="/" class="nav-link" id="nav-profile">Profile</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="#" class="nav-link">Support</a>
+      <a href="#" class="nav-link">Setting</a>
+      <a href="#" class="nav-link">
+        Sign out
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </a>
+
+      <!-- Theme Switch -->
+      <div class="theme-switch-box">
+        <span class="theme-label">Theme</span>
+        <div class="theme-toggle" id="theme-toggle-btn" title="Toggle Dark/Light Mode"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <main class="main-wrapper">
+    <header class="top-header">
+      <div class="brand-tag">
+        <span class="indicator-dot"></span>
+        <span>FinGraph AI Platform • Live Engine</span>
+      </div>
+      <div class="header-tools">
+        <div class="search-pill">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Search analytics..." id="global-search-input">
+        </div>
+        <a href="/" class="btn-pill">&larr; Back to Dashboard</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="title-bar">
+        <div>
+          <h2>Evidence Flow: Source to Status</h2>
+          <p>Complete 6-stage lineage from SEC EDGAR ingestion to empirical validation</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <span class="btn-pill" id="chip-total" style="background:var(--bg-card);">Total: 0 edges</span>
+          <span class="btn-pill" style="color:var(--accent-green); border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.08);">100% Verifiable</span>
+        </div>
+      </div>
+
+      <!-- Metrics Row -->
+      <div class="metrics-row">
+        <div class="metric-card"><b id="m-ingested">0</b><span>Ingested Filings</span></div>
+        <div class="metric-card"><b id="m-relations">0</b><span>Extracted Relations</span></div>
+        <div class="metric-card"><b id="m-verified" style="color:var(--accent-green);">0</b><span>Verified Quotes</span></div>
+        <div class="metric-card"><b id="m-facts">0</b><span>Empirical Facts</span></div>
+        <div class="metric-card"><b id="m-inferences" style="color:var(--accent-orange);">0</b><span>Inferences</span></div>
+        <div class="metric-card"><b id="m-untested" style="color:var(--text-muted);">0</b><span>Pending Validation</span></div>
+      </div>
+
+      <!-- Flow Container -->
+      <div class="flow-container" id="flow-wrap">
+        <svg class="flow-svg" id="flow-canvas"></svg>
+        <div class="columns-grid" id="columns-grid">
+          <!-- Dynamically populated from GET /flow -->
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// Theme Switch
+const themeBtn = document.getElementById("theme-toggle-btn");
+themeBtn.addEventListener("click", () => {
+  const currentTheme = document.body.getAttribute("data-theme");
+  const newTheme = currentTheme === "light" ? "dark" : "light";
+  document.body.setAttribute("data-theme", newTheme);
+});
+
+const $ = id => document.getElementById(id);
+const API = window.location.origin;
+
+let flowData = null;
+let activeNodeId = null;
+
+async function loadFlow() {
+  try {
+    const res = await fetch(`${API}/flow`);
+    flowData = await res.json();
+    renderFlow(flowData);
+  } catch (err) {
+    console.error("Failed to load /flow:", err);
+    $("columns-grid").innerHTML = '<div style="padding:20px;color:var(--accent-orange)">Unable to load flow data from API.</div>';
+  }
+}
+
+function renderFlow(data) {
+  const total = data.total || 0;
+  $("chip-total").textContent = `Total: ${total} edges`;
+  $("m-ingested").textContent = total;
+  $("m-relations").textContent = total;
+  $("m-verified").textContent = total;
+
+  const factNode = data.N?.find(n => n.id === "tier_fact");
+  const infNode = data.N?.find(n => n.id === "tier_inference");
+  const untestedNode = data.N?.find(n => n.id === "val_untested");
+
+  $("m-facts").textContent = factNode ? factNode.value : 0;
+  $("m-inferences").textContent = infNode ? infNode.value : 0;
+  $("m-untested").textContent = untestedNode ? untestedNode.value : 0;
+
+  const grid = $("columns-grid");
+  grid.innerHTML = data.columns.map((col, idx) => {
+    const colTotal = col.nodes.reduce((acc, n) => acc + n.value, 0);
+    return `
+      <div class="flow-col" data-col="${idx}">
+        <div class="col-header">
+          <h3><span>${col.name}</span><small style="color:var(--text-muted)">${colTotal}</small></h3>
+          <div class="sub">Stage ${idx + 1} of 6</div>
+        </div>
+        <div class="node-stack">
+          ${col.nodes.map(n => `
+            <div class="flow-node" id="fn-${n.id}" data-id="${n.id}" data-col="${idx}">
+              <div class="node-hd">
+                <span>${n.label}</span>
+                <span style="color:${n.color}">${n.value}</span>
+              </div>
+              <div class="node-bar">
+                <i style="width:${n.pct}%;background:${n.color}"></i>
+              </div>
+              <div class="node-sub">
+                <span>${n.pct}%</span>
+                <span>Stage ${idx + 1}</span>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  setTimeout(drawRibbons, 50);
+  bindHoverTrace();
+}
+
+function drawRibbons() {
+  if (!flowData || !flowData.L) return;
+  const svg = $("flow-canvas");
+  const wrap = $("flow-wrap");
+  const wrapRect = wrap.getBoundingClientRect();
+  
+  svg.setAttribute("width", wrap.scrollWidth);
+  svg.setAttribute("height", wrap.scrollHeight);
+  
+  let pathsHtml = "";
+  flowData.L.forEach(link => {
+    const srcEl = $(`fn-${link.source}`);
+    const tgtEl = $(`fn-${link.target}`);
+    if (!srcEl || !tgtEl) return;
+
+    const r1 = srcEl.getBoundingClientRect();
+    const r2 = tgtEl.getBoundingClientRect();
+
+    const x1 = r1.right - wrapRect.left + wrap.scrollLeft;
+    const y1 = r1.top + r1.height / 2 - wrapRect.top + wrap.scrollTop;
+    const x2 = r2.left - wrapRect.left + wrap.scrollLeft;
+    const y2 = r2.top + r2.height / 2 - wrapRect.top + wrap.scrollTop;
+
+    const dx = (x2 - x1) * 0.5;
+    const pathD = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+    const strokeWidth = Math.max(1.5, Math.min(18, (link.value / (flowData.total || 1)) * 32));
+    const srcNode = flowData.N.find(n => n.id === link.source);
+    const strokeColor = srcNode ? srcNode.color : "#38bdf8";
+
+    pathsHtml += `
+      <path class="ribbon" id="ribbon-${link.source}-${link.target}"
+            data-src="${link.source}" data-tgt="${link.target}" data-val="${link.value}"
+            d="${pathD}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-opacity="0.32" />
+    `;
+  });
+  svg.innerHTML = pathsHtml;
+}
+
+function bindHoverTrace() {
+  const nodes = document.querySelectorAll(".flow-node");
+  const ribbons = document.querySelectorAll("path.ribbon");
+  const tooltip = $("tooltip");
+
+  nodes.forEach(node => {
+    node.addEventListener("mouseenter", e => {
+      const nid = node.dataset.id;
+      activeNodeId = nid;
+
+      const connected = new Set([nid]);
+      ribbons.forEach(r => {
+        if (r.dataset.src === nid || r.dataset.tgt === nid) {
+          connected.add(r.dataset.src);
+          connected.add(r.dataset.tgt);
+          r.classList.add("active");
+          r.classList.remove("dimmed");
+        } else {
+          r.classList.add("dimmed");
+          r.classList.remove("active");
+        }
+      });
+
+      nodes.forEach(n => {
+        if (connected.has(n.dataset.id)) {
+          n.classList.remove("dimmed");
+        } else {
+          n.classList.add("dimmed");
+        }
+      });
+
+      const nodeData = flowData?.N?.find(item => item.id === nid);
+      if (nodeData) {
+        tooltip.innerHTML = `<strong>${nodeData.label}</strong><br/>Count: ${nodeData.value} (${nodeData.pct}%)`;
+        tooltip.style.display = "block";
+      }
+    });
+
+    node.addEventListener("mousemove", e => {
+      tooltip.style.left = (e.clientX + 14) + "px";
+      tooltip.style.top = (e.clientY + 14) + "px";
+    });
+
+    node.addEventListener("mouseleave", () => {
+      activeNodeId = null;
+      ribbons.forEach(r => {
+        r.classList.remove("active");
+        r.classList.remove("dimmed");
+      });
+      nodes.forEach(n => n.classList.remove("dimmed"));
+      tooltip.style.display = "none";
+    });
+  });
+
+  window.addEventListener("resize", drawRibbons);
+}
+
+document.addEventListener("DOMContentLoaded", loadFlow);
+</script>
+</body>
+</html>

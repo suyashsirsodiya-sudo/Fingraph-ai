@@ -1,0 +1,100 @@
+{
+  "event_date": "2022-03-08",
+  "index_ticker": "SPY",
+  "total_companies": 6,
+  "counts": {
+    "consistent": 5,
+    "not_consistent": 1,
+    "confounded": 0,
+    "total": 6
+  },
+  "text_summary": "Observed cumulative abnormal returns for DAL, XOM, VLO, UNP, F are consistent with the Event Impact Graph's directional shock predictions. Results for FDX are not consistent with the predicted direction. Primary event date evaluated: 2022-03-08.",
+  "companies": {
+    "DAL": {
+      "ticker": "DAL",
+      "abnormal_return": -0.0255,
+      "predicted_direction": "negative",
+      "observed_direction": "negative",
+      "status": "consistent",
+      "beta": 1.3851,
+      "alpha": -0.00051,
+      "statement": "Observed abnormal return of -2.55% is consistent with the graph's predicted negative shock"
+    },
+    "XOM": {
+      "ticker": "XOM",
+      "abnormal_return": 0.01,
+      "predicted_direction": "positive",
+      "observed_direction": "positive",
+      "status": "consistent",
+      "beta": 0.4247,
+      "alpha": 0.003511,
+      "statement": "Observed abnormal return of +1.00% is consistent with the graph's predicted positive shock"
+    },
+    "VLO": {
+      "ticker": "VLO",
+      "abnormal_return": 0.0506,
+      "predicted_direction": "positive",
+      "observed_direction": "positive",
+      "status": "consistent",
+      "beta": 0.6892,
+      "alpha": 0.001207,
+      "statement": "Observed abnormal return of +5.06% is consistent with the graph's predicted positive shock"
+    },
+    "FDX": {
+      "ticker": "FDX",
+      "abnormal_return": 0.0394,
+      "predicted_direction": "negative",
+      "observed_direction": "positive",
+      "status": "not consistent",
+      "beta": 0.7948,
+      "alpha": -0.000419,
+      "statement": "Observed abnormal return of +3.94% is not consistent with the graph's predicted negative shock"
+    },
+    "UNP": {
+      "ticker": "UNP",
+      "abnormal_return": -0.0156,
+      "predicted_direction": "negative",
+      "observed_direction": "negative",
+      "status": "consistent",
+      "beta": 0.591,
+      "alpha": 0.001541,
+      "statement": "Observed abnormal return of -1.56% is consistent with the graph's predicted negative shock"
+    },
+    "F": {
+      "ticker": "F",
+      "abnormal_return": -0.0119,
+      "predicted_direction": "negative",
+      "observed_direction": "negative",
+      "status": "consistent",
+      "beta": 1.6747,
+      "alpha": 0.001727,
+      "statement": "Observed abnormal return of -1.19% is consistent with the graph's predicted negative shock"
+    }
+  },
+  "jet_fuel->dal": "consistent",
+  "energy_fuel_inputs->dal": "consistent",
+  "commodity_inputs->xom": "consistent",
+  "crude_oil_refined_products->xom": "consistent",
+  "petroleum_feedstocks->xom": "consistent",
+  "crude_oil_feedstock->xom": "consistent",
+  "energy_fuel_inputs->xom": "consistent",
+  "crude_oil_feedstock->vlo": "consistent",
+  "petroleum_feedstocks->vlo": "consistent",
+  "energy_fuel_inputs->vlo": "consistent",
+  "crude_oil_refined_products->vlo": "consistent",
+  "diesel_fuel->vlo": "consistent",
+  "jet_fuel->fdx": "not consistent",
+  "energy_fuel_inputs->fdx": "not consistent",
+  "energy_fuel_inputs->unp": "consistent",
+  "diesel_fuel->unp": "consistent",
+  "crude_oil_feedstock->unp": "consistent",
+  "commodity_inputs->unp": "consistent",
+  "commodity_inputs->f": "consistent",
+  "energy_fuel_inputs->f": "consistent",
+  "DAL": "consistent",
+  "XOM": "consistent",
+  "VLO": "consistent",
+  "FDX": "not consistent",
+  "UNP": "consistent",
+  "F": "consistent"
+}

@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+networkx
+pydantic
+beautifulsoup4
+requests
+python-dotenv
+pytest
+httpx
+numpy
+pandas
+yfinance
+sqlalchemy
+

@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-10-15T05:14:56.790919+00:00",
+  "sample_size": 100,
+  "total_edges": 154,
+  "valid_quote": {
+    "count": 100,
+    "total": 100,
+    "proportion": 1.0,
+    "ci_lower": 0.963,
+    "ci_upper": 1.0,
+    "display": "100/100 (100.0%, 95% CI: [96.3%, 100.0%])"
+  },
+  "edge_precision": {
+    "count": 95,
+    "total": 100,
+    "proportion": 0.95,
+    "ci_lower": 0.8882,
+    "ci_upper": 0.9785,
+    "display": "95/100 (95.0%, 95% CI: [88.8%, 97.9%])"
+  },
+  "tier_accuracy": {
+    "count": 92,
+    "total": 100,
+    "proportion": 0.92,
+    "ci_lower": 0.85,
+    "ci_upper": 0.9589,
+    "display": "92/100 (92.0%, 95% CI: [85.0%, 95.9%])"
+  },
+  "inter_reviewer_agreement": {
+    "claim_support": {
+      "kappa": 0.4271,
+      "raw_agreement": 0.89,
+      "display": "Kappa: 0.43 (Raw Agreement: 89.0%)"
+    },
+    "tier_correctness": {
+      "kappa": 0.5961,
+      "raw_agreement": 0.91,
+      "display": "Kappa: 0.60 (Raw Agreement: 91.0%)"
+    }
+  },
+  "latency": {
+    "iterations": 100,
+    "median_ms": 0.232,
+    "p95_ms": 0.441,
+    "min_ms": 0.134,
+    "max_ms": 1.856,
+    "display": "Median: 0.23 ms | p95: 0.44 ms (100 runs)"
+  },
+  "leakage_test": {
+    "event_date": "2022-03-08",
+    "total_edges": 154,
+    "pit_edges_retained": 0,
+    "post_event_edges_dropped": 154,
+    "leakage_score_l1_norm": 1.368,
+    "discrepant_nodes": {
+      "XOM": {
+        "full_score": 0.456,
+        "pit_score": 0.0,
+        "diff": 0.456
+      },
+      "UNP": {
+        "full_score": 0.456,
+        "pit_score": 0.0,
+        "diff": 0.456
+      },
+      "VLO": {
+        "full_score": 0.456,
+        "pit_score": 0.0,
+        "diff": 0.456
+      }
+    },
+    "leakage_detected": true,
+    "summary": "Point-in-time leakage audit: 154 post-event or subsequent filings removed for event 2022-03-08. L1 score difference: 1.3680. Point-in-time boundary successfully isolated."
+  }
+}

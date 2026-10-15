@@ -1,0 +1,58 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment and sensitive credentials
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Large raw SEC filings (re-fetchable via data/fetch_edgar.py)
+data/raw/filings/
+
+# SQLite database journals and temporary files
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Executables, binaries and tunnels
+*.exe
+cloudflared*
+*.dll
+*.dylib
+
+# Pytest / Test cache & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Editor and IDE configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Scratch and temporary directories
+scratch/
+tmp/
+*.tmp

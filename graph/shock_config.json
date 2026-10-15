@@ -1,0 +1,19 @@
+{
+  "supply": [
+    "purchases and is exposed to costs of",
+    "is exposed to price volatility of",
+    "may affect operating expenses of",
+    "is exposed to cost fluctuations of",
+    "purchases feedstock as",
+    "passes through price changes via surcharges to"
+  ],
+  "demand": [
+    "passes through price changes via surcharges to",
+    "is exposed to consumer demand for",
+    "may affect passenger volume of",
+    "is exposed to freight volume demand of"
+  ],
+  "unknown": [
+    "*"
+  ]
+}

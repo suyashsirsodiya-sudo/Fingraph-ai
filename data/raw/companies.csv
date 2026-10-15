@@ -1,0 +1,7 @@
+ticker,company_name,cik,filing_date,url
+DAL,"Delta Air Lines, Inc.",0000027904,2026-02-11,https://www.sec.gov/Archives/edgar/data/27904/000002790426000013/dal-20251231.htm
+XOM,"Exxon Mobil Corp",0000034088,2026-02-18,https://www.sec.gov/Archives/edgar/data/34088/000003408826000045/xom-20251231.htm
+VLO,"Valero Energy Corp",0001035002,2026-02-25,https://www.sec.gov/Archives/edgar/data/1035002/000162828026011499/vlo-20251231.htm
+FDX,"FedEx Corp",0001048911,2026-07-20,https://www.sec.gov/Archives/edgar/data/1048911/000104891126000105/fdx-20260531.htm
+UNP,"Union Pacific Corp",0000100885,2026-02-06,https://www.sec.gov/Archives/edgar/data/100885/000010088526000037/unp-20251231.htm
+F,"Ford Motor Co",0000037996,2026-02-11,https://www.sec.gov/Archives/edgar/data/37996/000003799626000015/f-20251231.htm

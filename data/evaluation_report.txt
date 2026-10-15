@@ -1,0 +1,34 @@
+======================================================================
+           EVENT IMPACT GRAPH: SYSTEM EVALUATION REPORT               
+======================================================================
+
+Evaluation Date: 2026-10-15T05:14:56.790919+00:00
+Sample Size:     100 edges audited across 2 independent reviewers
+Total Corpus:    154 stored SEC 10-K extraction edges
+
+1. PRIMARY EXTRACTION METRICS (Reported with 95% Wilson Score CIs)
+----------------------------------------------------------------------
+- Valid-Quote Rate:   100/100 (100.0%, 95% CI: [96.3%, 100.0%])
+- Edge Precision:      95/100 (95.0%, 95% CI: [88.8%, 97.9%])
+- Epistemic Tier Acc:  92/100 (92.0%, 95% CI: [85.0%, 95.9%])
+
+2. INTER-REVIEWER RELIABILITY
+----------------------------------------------------------------------
+- Claim Support Agreement:    Kappa: 0.43 (Raw Agreement: 89.0%)
+- Tier Correctness Agreement: Kappa: 0.60 (Raw Agreement: 91.0%)
+
+3. PROPAGATION LATENCY BENCHMARK (Weighted BFS, 100 runs)
+----------------------------------------------------------------------
+- Median Latency:  0.23 ms
+- 95th Percentile: 0.44 ms
+- Range:           0.13 ms - 1.86 ms
+
+4. POINT-IN-TIME LEAKAGE TEST (Audit against 2022-03-08 Event Date)
+----------------------------------------------------------------------
+- Event Date Audited:         2022-03-08
+- Post-Event Filings Dropped: 154/154 edges
+- Retained Point-in-Time:     0 edges
+- Propagation L1 Score Diff:  1.3680
+- Point-in-Time Audit Status: PASS (Strict boundary prevents lookahead bias)
+
+======================================================================

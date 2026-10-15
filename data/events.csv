@@ -1,0 +1,4 @@
+event_id,event_name,event_date,shock_type,description
+crude_oil_spike_2022,"Crude Oil Price Spike",2022-03-08,supply,"Brent crude oil surged past $130/bbl following geopolitical supply disruption"
+crude_oil_spike_2026,"Crude Oil Price Spike",2026-03-15,supply,"Global crude benchmark price shock and supply contraction"
+diesel_freight_spike_2024,"Diesel & Freight Surcharge Surge",2024-10-01,supply,"Refinery margin expansion and diesel inventory drawdowns"
